@@ -31,6 +31,9 @@ public class MainActivity extends AppCompatActivity {
     @BindView(R.id.btn_4)
     Button button4;
 
+    @BindView(R.id.btn_5)
+    Button button5;
+
     private Handler mHandler;//
 
 
@@ -64,6 +67,13 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 new NonUiThread().start();
+            }
+        });
+
+        button5.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                sendMessToThread4();
             }
         });
 
@@ -141,6 +151,41 @@ public class MainActivity extends AppCompatActivity {
             }
         }).start();
     }
+
+    /**
+     * 子线程向子线程发消息
+     */
+    private void sendMessToThread4(){
+        //把looper绑定到子线程中，并且创建一个handler。在另一个线程中通过这个handler发送消息，就可以实现子线程之间的通信了。
+        new Thread(new Runnable() {
+
+            @Override
+            public void run() {
+                Looper.prepare();
+                mHandler = new Handler() {
+                    @Override
+                    public void handleMessage(Message msg) {
+                        super.handleMessage(msg);
+                        System.out.println("这个消息是从-->>" + msg.obj+ "过来的，在" + "btn的子线程当中" + "中执行的");
+                    }
+
+                };
+                Looper.loop();//开始轮循
+
+            }
+        }).start();
+
+        new Thread(new Runnable() {
+
+            @Override
+            public void run() {
+                Message msg = mHandler.obtainMessage();
+                msg.obj = "子线程B向子线程A发消息";
+                mHandler.sendMessage(msg);
+            }
+        }).start();
+    }
+
 
 
     //非UI线程是可以刷新UI的呀，前提是它要拥有自己的ViewRoot。如果想直接创建ViewRoot实例，你会发现找不到这个类。那怎么做呢？通过WindowManager。

@@ -1,4 +1,4 @@
-package com.aotuman.unit;
+package com.aotuman.unit.handler;
 
 import android.graphics.PixelFormat;
 import android.os.Handler;
@@ -14,10 +14,12 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.aotuman.unit.R;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class MainActivity extends AppCompatActivity {
+public class HandlerMainActivity extends AppCompatActivity {
 
     @BindView(R.id.btn_1)
     Button button1;
@@ -137,17 +139,27 @@ public class MainActivity extends AppCompatActivity {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                Looper.prepare();//创建该子线程的Looper
+                // 1.创建子线程的Looper消息轮询器
+                //  Looper.prepare() -> sThreadLocal.set(new Looper(quitAllowed)); ->   mQueue = new MessageQueue(quitAllowed);
+                Looper.prepare();
+                // 2.创建子线程的handler，自动关联该线程的Looper
+                //  new Handler() -> mLooper = Looper.myLooper(); -> sThreadLocal.get()
                 Handler handler = new Handler(){
 
                     @Override
                     public void handleMessage(Message msg) {
                         super.handleMessage(msg);
-                        Toast.makeText(getApplicationContext(), "handler msg", Toast.LENGTH_LONG).show();
+                        Log.d("当前子线程是----->", Thread.currentThread().getName());
+                        Toast.makeText(getApplicationContext(), "当前子线程是----->"+ Thread.currentThread().getName(), Toast.LENGTH_LONG).show();
                     }
                 };
+                // 3.发送消息 ,把消息放进消息队列
+                // sendMessageAtTime -> enqueueMessage
                 handler.sendEmptyMessage(1);
-                Looper.loop();//只要调用了该方法才能不断循环取出消息
+                // 4.Looper消息轮询器不断循环取出消息
+                Looper.loop();
+                // 5.回调handler的handleMessage方法
+                // Message msg = queue.next(); ->  msg.target.dispatchMessage(msg); ->   message.callback.run();
             }
         }).start();
     }
@@ -193,10 +205,10 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void run() {
             Looper.prepare();
-            TextView tx = new TextView(MainActivity.this);
+            TextView tx = new TextView(HandlerMainActivity.this);
             tx.setText("non-UiThread update textview");
 
-            WindowManager windowManager = MainActivity.this.getWindowManager();
+            WindowManager windowManager = HandlerMainActivity.this.getWindowManager();
             WindowManager.LayoutParams params = new WindowManager.LayoutParams(
                     200, 200, 200, 200, WindowManager.LayoutParams.FIRST_SUB_WINDOW,
                     WindowManager.LayoutParams.TYPE_TOAST,PixelFormat.OPAQUE);
@@ -204,5 +216,32 @@ public class MainActivity extends AppCompatActivity {
             windowManager.addView(tx, params);
             Looper.loop();
         }
+    }
+
+    // 子线程通过handler.post(runnable)更新UI
+    private void post(){
+        mHandler = new Handler();
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                mHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        // 在这里进行UI操作
+                    }
+                });
+            }
+        }).start();
+
+    }
+
+    // 子线程通过runOnUiThread()更新UI
+    private void runonuithread(){
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+
+            }
+        });
     }
 }

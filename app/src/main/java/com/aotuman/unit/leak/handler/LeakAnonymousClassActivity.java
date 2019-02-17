@@ -1,4 +1,4 @@
-package com.aotuman.unit.leak;
+package com.aotuman.unit.leak.handler;
 
 import android.os.Bundle;
 import android.os.Handler;
@@ -16,7 +16,7 @@ import com.aotuman.unit.R;
 public class LeakAnonymousClassActivity extends AppCompatActivity {
 
 
-    public static final String TAG = "LeakInnerClassActivity";
+    public static final String TAG = "LeakAnonymousClassActivity";
     private Handler showhandler;
 
     @Override

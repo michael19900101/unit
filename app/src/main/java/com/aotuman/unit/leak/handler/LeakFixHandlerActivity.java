@@ -1,4 +1,4 @@
-package com.aotuman.unit.leak;
+package com.aotuman.unit.leak.handler;
 
 import android.app.Activity;
 import android.os.Bundle;
@@ -18,10 +18,10 @@ import java.lang.ref.WeakReference;
  * 同时，还可加上 使用WeakReference弱引用持有Activity实例
  * 原因：弱引用的对象拥有短暂的生命周期。在垃圾回收器线程扫描时，一旦发现了只具有弱引用的对象，不管当前内存空间足够与否，都会回收它的内存
  */
-public class LeakFixActivity extends AppCompatActivity {
+public class LeakFixHandlerActivity extends AppCompatActivity {
 
 
-    public static final String TAG = "LeakInnerClassActivity";
+    public static final String TAG = "LeakFixHandlerActivity";
     private Handler showhandler;
 
     @Override
